@@ -11,6 +11,10 @@
     "stylus": "*",
      "node-neo4j": "~1.0.5",
     "async": "*",
-    "promised-io": "*"
+    "promised-io": "*",
+    "nock": "*",
+    "cheerio": "*",
+    "rate-limit": "*",
+    "underscore": "~1.6.0"
   }
 }
