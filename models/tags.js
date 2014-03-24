@@ -7,7 +7,8 @@ rate_limit = require('rate-limit'),
 _ = require('underscore'),
 Company = require('./companies.js');
 
-var crunchbase_queue = rate_limit.createQueue({interval: 150}); 
+var crunchbase_queue = rate_limit.createQueue({interval: 200}); 
+
 
 var Tag = function () {
 };
@@ -63,7 +64,6 @@ Tag.prototype.get_tags = function(tags) {
 			  	var bodyChunks = [],
 			  	body,
 			  	companies = [];
-
 			  	res.on('data', function(chunk) {
 			    		bodyChunks.push(chunk);
 			  		})
@@ -73,7 +73,7 @@ Tag.prototype.get_tags = function(tags) {
 
 			    		var table = $('div.float_photo td').first().find('a');
 			    		Object.keys(table).slice(0,-2).forEach(function (key) {
-							  companies.push(table[key].attribs.title);
+							  companies.push(table[key].attribs.href.slice(9));
 						});
 					callback(null,companies);
 				});
@@ -120,45 +120,21 @@ Tag.prototype.map_tag = function(tag) {
 				// Then ping the API to get information, including tags, for those companies
 				function(companies_list, callback) { 
 					console.log('Pinging the API:' + companies_list);
-					company.get_companies(companies_list).then(function(companies_with_info) {
-						callback(null, companies_with_info);
-					});
-				}, 
-				//Then save these companies to the DB
-				function(companies_with_info, callback) {
-					console.log('Saving companies with info: ' + companies_with_info.length)
-					async.eachSeries(companies_with_info, function(company_info, callback2) {
-						company.find_or_create(company_info).then(function (tags) { 
-							tag_list = tag_list.concat(tags[0].map(function(tag) { return tag.data.name}));
-							callback2();
-						});
-					}, function (err) {
-						callback(null, _.uniq(tag_list));
+					company.get_companies(companies_list).then(function(tag_list) {
+						callback(null, tag_list);
 					});
 				},
 				//Then get info for the collected tags;
 				function(tag_list, callback) {
-					console.log('Getting big list of tags');
+					console.log('Getting big list of tags: ' + tag_list);
 					self.get_tags(tag_list).then(function(big_companies_list) {
 						callback(null, big_companies_list);
 					});
 				}, //Then get infor for each of their companies
 				function(big_companies_list, callback) { 
 					console.log('Pinging API for Big Companies list');
-					crunchbase_queue = rate_limit.createQueue({interval: 1000}); 
+					crunchbase_queue = rate_limit.createQueue({interval: 500}); 
 					company.get_companies(big_companies_list).then(function(companies_with_info) {
-						callback(null, companies_with_info);
-					});
-				},
-				//Then save these companies to the DB
-				function(companies_with_info, callback) {
-					console.log('Saving companies with info: ' + companies_with_info.length)
-					async.eachSeries(companies_with_info, function(company_info, callback2) {
-						company.find_or_create(company_info).then(function (tags) { 
-							tag_list = tag_list.concat(tags[0].map(function(tag) { return tag.data.name}));
-							callback2();
-						});
-					}, function (err) {
 						callback(null, _.uniq(tag_list));
 					});
 				}],

@@ -1,16 +1,16 @@
 // tests/tags-spec.js
 var tag = require("../../models/tags.js");
-var nock = require('nock');
+var nock = require('nock'); 
 
 var fakeCrunch = function (url, obj) {
 			nock('http://www.crunchbase.com')
                 .get(url)
                 .reply(200, obj)
             };
-
+ 
 var promise_test = function(promise, expects, wait) {
 	var result, done;
-	runs (function() {
+	runs (function() { 
 		promise.then(function(res) {
 			result = res;
 			done = true;
@@ -26,9 +26,9 @@ var promise_test = function(promise, expects, wait) {
 	runs(function() {
 		expects(result)
 	});
-}
+};
 
-xdescribe('get_tags', function() {
+describe('get_tags', function() {
 	xit('should get tags from crunchbase', function() {
 		var test_tag = new tag;
 		var expects = function(result) {
@@ -40,7 +40,7 @@ xdescribe('get_tags', function() {
 });
 
 
-xdescribe('find_or_create', function() {
+describe('find_or_create', function() {
 	xit ("should find an existing tag", function() {
 		var test_tag = new tag;
 		promise_test(test_tag.find_or_create('smart_home'), 
@@ -51,7 +51,8 @@ xdescribe('find_or_create', function() {
 
 });
 
-xdescribe('check_tag', function() {
+
+describe('check_tag', function() {
 	it ("should return true for a tag already in the DB", function() {
 		var test_tag = new tag;
 		var result, done1, done2;
@@ -102,11 +103,11 @@ xdescribe('check_tag', function() {
 
 });
 
- describe("Tag mapping", function() {
+describe("Tag mapping", function() {
  	it("should map a tag", function() {
  		var test_tag = new tag;
  		promise_test(test_tag.map_tag('smart-home'), function(result) {
  			expect(result).toBe('Bugs Bunny');
- 		}, 120000)
+ 		}, 360000)
  	})
- })
+});
